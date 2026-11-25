@@ -1,0 +1,22 @@
+node_modules
+.env
+.env.*
+!.env.example
+
+# Local databases (PGlite) and uploaded files — never commit data
+.pglite
+.pglite-*
+.pglite-test
+uploads
+.uploads-*
+.uploads-test
+
+# Build output
+dist
+
+# Test/coverage artifacts
+coverage
+*.log
+
+# Turbo cache
+.turbo

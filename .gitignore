@@ -32,7 +32,34 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Local env files (catch-all)
+.env.*
+!.env.example
+
+# TypeScript / build caches
+*.tsbuildinfo
+.cache
 
 # Misc
 .DS_Store
+Thumbs.db
+desktop.ini
 *.pem
+*.key
+
+# OS / IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local databases / data dumps
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+
