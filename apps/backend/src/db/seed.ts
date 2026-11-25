@@ -33,7 +33,7 @@ const SUBJECTS = [
   { name: "Mathematics", code: "MA301", semester: 2 },
 ];
 
-async function main() {
+export async function runSeed() {
   const db = await getDb();
 
   const insertedColleges = await db
@@ -44,14 +44,16 @@ async function main() {
   console.log(`colleges: ${insertedColleges.length} inserted`);
 
   const allColleges = await db.select({ id: colleges.id }).from(colleges);
-  const subjectRows = SUBJECTS.flatMap((s) =>
-    // One shared (collegeId = null) copy per subject for cross-campus discovery.
-    [{ ...s, collegeId: null as string | null }],
+  const existingSubjects = await db
+    .select({ name: subjects.name })
+    .from(subjects);
+  const existingNames = new Set(existingSubjects.map((s) => s.name));
+  const subjectRows = SUBJECTS.filter((s) => !existingNames.has(s.name)).map(
+    (s) => ({ ...s, collegeId: null as string | null }),
   );
-  const insertedSubjects = await db
-    .insert(subjects)
-    .values(subjectRows)
-    .returning({ id: subjects.id });
+  const insertedSubjects = subjectRows.length
+    ? await db.insert(subjects).values(subjectRows).returning({ id: subjects.id })
+    : [];
   console.log(`subjects: ${insertedSubjects.length} inserted`);
 
   // Demo student for local development. Documented credentials — not for production.
@@ -168,10 +170,17 @@ async function main() {
       console.log(`seeded resource: ${sr.title}`);
     }
   }
-  process.exit(0);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMain) {
+  runSeed()
+    .then(() => process.exit(0))
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    });
+}

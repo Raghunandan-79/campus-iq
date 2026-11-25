@@ -5,6 +5,11 @@ import { logger } from "./utils/logger";
 
 async function main() {
   await getDb(); // runs migrations on boot
+  if (config.AUTO_SEED === "true") {
+    const { runSeed } = await import("./db/seed");
+    await runSeed();
+    logger.info("auto_seed_complete");
+  }
   const app = createApp();
   app.listen(config.PORT, () => {
     logger.info("server_started", {

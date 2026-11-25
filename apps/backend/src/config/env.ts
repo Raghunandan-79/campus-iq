@@ -16,6 +16,7 @@ const envSchema = z.object({
     .transform((v) => v === "true"),
 
   STORAGE_PROVIDER: z.enum(["local", "r2"]).default("local"),
+  AUTO_SEED: z.enum(["true", "false"]).default("false"),
   STORAGE_LOCAL_DIR: z.string().default("./uploads"),
 
   R2_ACCOUNT_ID: z.string().optional(),
