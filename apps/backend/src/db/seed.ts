@@ -1,9 +1,7 @@
-import argon2 from "argon2";
-import { eq } from "drizzle-orm";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getDb } from "./index";
-import { colleges, subjects, users } from "./schema";
+import { colleges, subjects } from "./schema";
 
 const COLLEGES = [
   { name: "IIT Delhi", domain: "iitd.ac.in", location: "New Delhi", website: "https://www.iitd.ac.in" },
@@ -41,7 +39,6 @@ export async function runSeed() {
     .returning({ id: colleges.id, name: colleges.name });
   console.log(`colleges: ${insertedColleges.length} inserted`);
 
-  const allColleges = await db.select({ id: colleges.id }).from(colleges);
   const existingSubjects = await db
     .select({ name: subjects.name })
     .from(subjects);
@@ -53,48 +50,6 @@ export async function runSeed() {
     ? await db.insert(subjects).values(subjectRows).returning({ id: subjects.id })
     : [];
   console.log(`subjects: ${insertedSubjects.length} inserted`);
-
-  // Demo student for local development. Documented credentials — not for production.
-  const demoEmail = "demo@campusiq.dev";
-  const existing = await db.query.users.findFirst?.({
-    where: (u, { eq }) => eq(u.email, demoEmail),
-  });
-  if (!existing) {
-    const passwordHash = await argon2.hash("password123", {
-      type: argon2.argon2id,
-    });
-    const college = allColleges[0];
-    await db.insert(users).values({
-      name: "Demo Student",
-      email: demoEmail,
-      passwordHash,
-      collegeId: college?.id ?? null,
-      role: "student",
-    });
-    console.log(`demo user created: ${demoEmail} / password123`);
-  } else {
-    console.log("demo user already exists");
-  }
-
-  // Admin account for the admin portal (college requests, college management).
-  const adminEmail = "admin@campusiq.dev";
-  const existingAdmin = await db.query.users.findFirst?.({
-    where: (u, { eq }) => eq(u.email, adminEmail),
-  });
-  if (!existingAdmin) {
-    const passwordHash = await argon2.hash("Admin@123456", {
-      type: argon2.argon2id,
-    });
-    await db.insert(users).values({
-      name: "CampusIQ Admin",
-      email: adminEmail,
-      passwordHash,
-      role: "admin",
-    });
-    console.log(`admin user created: ${adminEmail} / Admin@123456`);
-  } else {
-    console.log("admin user already exists");
-  }
 }
 
 const isMain =
