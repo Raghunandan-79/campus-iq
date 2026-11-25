@@ -60,7 +60,9 @@ export function ResourceCard({
           >
             {resource.subject.name}
           </Link>
-          {resource.subject.semester && <span>Sem {resource.subject.semester}</span>}
+          {(resource.semester ?? resource.subject.semester) && (
+            <span>Sem {resource.semester ?? resource.subject.semester}</span>
+          )}
           {resource.batchYear && (
             <>
               <span>·</span>

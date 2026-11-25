@@ -374,7 +374,9 @@ export default function ResourceDetailPage() {
             <Link href={`/subjects/${r.subject.id}`} className="font-medium text-foreground hover:text-accent">
               {r.subject.name}
             </Link>
-            {r.subject.semester && <span>· Sem {r.subject.semester}</span>}
+            {(r.semester ?? r.subject.semester) && (
+              <span>· Sem {r.semester ?? r.subject.semester}</span>
+            )}
             {r.batchYear && <span>· Batch {r.batchYear}</span>}
           </div>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">{r.title}</h1>

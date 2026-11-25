@@ -120,6 +120,7 @@ export interface ResourceListItem {
   fileSize: number | null;
   url: string | null;
   batchYear: number | null;
+  semester: number | null;
   visibility: string;
   downloadCount: number;
   createdAt: string;

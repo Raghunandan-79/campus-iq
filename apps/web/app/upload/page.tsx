@@ -32,6 +32,7 @@ function UploadForm() {
   const [collegeId, setCollegeId] = useState("");
   const [visibility, setVisibility] = useState<"campus" | "college" | "restricted">("campus");
   const [batchYear, setBatchYear] = useState("");
+  const [semester, setSemester] = useState("");
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,7 @@ function UploadForm() {
       if (description) form.append("description", description);
       if (collegeId) form.append("collegeId", collegeId);
       if (batchYear) form.append("batchYear", batchYear);
+      if (semester) form.append("semester", semester);
       if (isLink && url) form.append("url", url);
       form.append("visibility", visibility);
       return api.post<{ data: { resource: { id: string } } }>(
@@ -138,6 +140,15 @@ function UploadForm() {
                 <option value="">Any batch</option>
                 {Array.from({ length: 8 }, (_, i) => 2024 + i).map((y) => (
                   <option key={y} value={y}>Batch {y}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="sem">Semester (optional)</Label>
+              <Select id="sem" value={semester} onChange={(e) => setSemester(e.target.value)}>
+                <option value="">Any semester</option>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                  <option key={s} value={s}>Sem {s}</option>
                 ))}
               </Select>
             </div>

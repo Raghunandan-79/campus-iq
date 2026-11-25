@@ -144,6 +144,7 @@ export const resources = pgTable(
     fileSize: bigint("file_size", { mode: "number" }),
     url: varchar("url", { length: 1000 }),
     batchYear: integer("batch_year"),
+    semester: integer("semester"),
     visibility: visibilityEnum("visibility").notNull().default("campus"),
     uploadStatus: uploadStatusEnum("upload_status")
       .notNull()

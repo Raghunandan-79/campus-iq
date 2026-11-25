@@ -15,6 +15,13 @@
       "when": 1795628125318,
       "tag": "0001_abnormal_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795634235567,
+      "tag": "0002_smooth_quentin_quire",
+      "breakpoints": true
     }
   ]
 }

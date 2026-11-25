@@ -138,7 +138,9 @@ router.get(
 
     const fullWhere = and(
       ...conditions,
-      q.semester ? eq(subjects.semester, q.semester) : undefined,
+      q.semester
+        ? sql`coalesce(${resources.semester}, ${subjects.semester}) = ${q.semester}`
+        : undefined,
     );
 
     const orderBy =
@@ -307,6 +309,7 @@ router.post(
           fileSize: file ? file.size : null,
           url: isLink ? (m.url ?? null) : null,
           batchYear: m.batchYear ?? null,
+          semester: m.semester ?? null,
           visibility: m.visibility,
           uploadStatus: "ready",
         })

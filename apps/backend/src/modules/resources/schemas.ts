@@ -31,6 +31,7 @@ export const uploadMetaSchema = z.object({
   collegeId: z.string().uuid().optional().nullable(),
   visibility: z.enum(["campus", "college", "restricted"]).default("campus"),
   batchYear: z.coerce.number().int().min(2000).max(2100).optional().nullable(),
+  semester: z.coerce.number().int().min(1).max(12).optional().nullable(),
   url: z.string().trim().url().max(1000).optional().nullable(),
 }).refine((v) => v.subjectId || v.subjectName, {
   message: "subjectId or subjectName is required",
