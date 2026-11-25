@@ -1,11 +1,9 @@
 import argon2 from "argon2";
 import { eq } from "drizzle-orm";
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getDb } from "./index";
-import { colleges, resources, subjects, users } from "./schema";
-import { getStorage } from "../storage";
+import { colleges, subjects, users } from "./schema";
 
 const COLLEGES = [
   { name: "IIT Delhi", domain: "iitd.ac.in", location: "New Delhi", website: "https://www.iitd.ac.in" },
@@ -96,79 +94,6 @@ export async function runSeed() {
     console.log(`admin user created: ${adminEmail} / Admin@123456`);
   } else {
     console.log("admin user already exists");
-  }
-
-  // Seed real sample resources uploaded by the demo student at MIET Jammu.
-  const demoUser = await db.query.users.findFirst?.({
-    where: (u, { eq }) => eq(u.email, demoEmail),
-  });
-  const miet = await db.query.colleges.findFirst?.({
-    where: (c, { eq }) => eq(c.name, "MIET Jammu"),
-  });
-  const assetsDir = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../../seed-assets",
-  );
-  const SEED_RESOURCES = [
-    {
-      file: "mst 2 maths.pdf",
-      title: "MST 2 Mathematics — Handwritten Notes",
-      description:
-        "Complete handwritten notes for MST 2 Mathematics covering the full syllabus. Shared by a final-year student.",
-      subjectName: "Mathematics",
-      batchYear: 2026,
-      resourceType: "notes" as const,
-    },
-    {
-      file: "UNIT 2 .pptx.pdf",
-      title: "Cloud Computing — Unit 2 Notes",
-      description:
-        "Unit 2 study material for Cloud Computing: concepts, diagrams and key points compiled from lectures.",
-      subjectName: "Cloud Computing",
-      batchYear: 2027,
-      resourceType: "notes" as const,
-    },
-  ];
-  if (demoUser && miet && fs.existsSync(assetsDir)) {
-    const storage = getStorage();
-    for (const sr of SEED_RESOURCES) {
-      const filePath = path.join(assetsDir, sr.file);
-      if (!fs.existsSync(filePath)) continue;
-      const [existing] = await db
-        .select({ id: resources.id })
-        .from(resources)
-        .where(eq(resources.title, sr.title))
-        .limit(1);
-      if (existing) continue;
-      const subject = await db.query.subjects.findFirst?.({
-        where: (s, { eq: eqS }) => eqS(s.name, sr.subjectName),
-      });
-      if (!subject) continue;
-      const key = `seed/${sr.file.replace(/[^\w.\-]+/g, "_")}`;
-      const stat = fs.statSync(filePath);
-      await storage.upload({
-        key,
-        body: fs.createReadStream(filePath),
-        contentType: "application/pdf",
-        contentLength: stat.size,
-      });
-      await db.insert(resources).values({
-        title: sr.title,
-        description: sr.description,
-        resourceType: sr.resourceType,
-        subjectId: subject.id,
-        collegeId: miet.id,
-        uploadedBy: demoUser.id,
-        storageKey: key,
-        originalFilename: sr.file,
-        mimeType: "application/pdf",
-        fileSize: stat.size,
-        batchYear: sr.batchYear,
-        visibility: "campus",
-        uploadStatus: "ready",
-      });
-      console.log(`seeded resource: ${sr.title}`);
-    }
   }
 }
 
