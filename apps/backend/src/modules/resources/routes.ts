@@ -92,9 +92,9 @@ async function getVisibleResource(id: string, user?: AuthUser) {
   return row ?? null;
 }
 
-const resourceScoreSql = sql<number>`coalesce((select sum(case when ${resourceVotes.voteType} = 'upvote' then 1 when ${resourceVotes.voteType} = 'downvote' then -1 else 0 end) from ${resourceVotes} where ${resourceVotes.resourceId} = ${resources.id}), 0)`;
-const resourceUpSql = sql<number>`coalesce((select count(*) from ${resourceVotes} where ${resourceVotes.resourceId} = ${resources.id} and ${resourceVotes.voteType} = 'upvote'), 0)`;
-const resourceDownSql = sql<number>`coalesce((select count(*) from ${resourceVotes} where ${resourceVotes.resourceId} = ${resources.id} and ${resourceVotes.voteType} = 'downvote'), 0)`;
+export const resourceScoreSql = sql<number>`coalesce((select sum(case when ${resourceVotes.voteType} = 'upvote' then 1 when ${resourceVotes.voteType} = 'downvote' then -1 else 0 end) from ${resourceVotes} where ${resourceVotes.resourceId} = ${resources.id}), 0)`;
+export const resourceUpSql = sql<number>`coalesce((select count(*) from ${resourceVotes} where ${resourceVotes.resourceId} = ${resources.id} and ${resourceVotes.voteType} = 'upvote'), 0)`;
+export const resourceDownSql = sql<number>`coalesce((select count(*) from ${resourceVotes} where ${resourceVotes.resourceId} = ${resources.id} and ${resourceVotes.voteType} = 'downvote'), 0)`;
 
 // ---------- list / search ----------
 

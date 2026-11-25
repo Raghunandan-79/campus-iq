@@ -6,10 +6,16 @@ import {
   bookmarks,
   colleges,
   resourceReviews,
+  resourceVotes,
   resources,
   subjects,
   users,
 } from "../../db/schema";
+import {
+  resourceDownSql,
+  resourceScoreSql,
+  resourceUpSql,
+} from "../resources/routes";
 import { requireAuth } from "../../middleware/auth";
 import {
   asyncHandler,
@@ -80,30 +86,97 @@ router.patch(
   }),
 );
 
+const resourceCardSelect = {
+  resource: resources,
+  subjectName: subjects.name,
+  subjectCode: subjects.code,
+  semester: subjects.semester,
+  collegeName: colleges.name,
+  collegeLocation: colleges.location,
+  uploaderName: users.name,
+  score: resourceScoreSql,
+  upvotes: resourceUpSql,
+  downvotes: resourceDownSql,
+} as const;
+
+export type CardRow = {
+  resource: typeof resources.$inferSelect;
+  subjectName: string;
+  subjectCode: string | null;
+  semester: number | null;
+  collegeName: string;
+  collegeLocation: string | null;
+  uploaderName: string;
+  score: number;
+  upvotes: number;
+  downvotes: number;
+};
+
+export async function toCardItems(rows: CardRow[], userId: string, bookmarkedIds?: Set<string>) {
+  const db = await getDb();
+  const ids = rows.map((r) => r.resource.id);
+  const userVotes = new Map<string, string>();
+  let userBookmarks = bookmarkedIds ?? new Set<string>();
+  if (ids.length > 0) {
+    const votes = await db
+      .select()
+      .from(resourceVotes)
+      .where(
+        and(
+          eq(resourceVotes.userId, userId),
+          sql`${resourceVotes.resourceId} in (${sql.join(ids.map((i) => sql`${i}`), sql`, `)})`,
+        ),
+      );
+    for (const v of votes) userVotes.set(v.resourceId, v.voteType);
+    if (!bookmarkedIds) {
+      const bms = await db
+        .select({ resourceId: bookmarks.resourceId })
+        .from(bookmarks)
+        .where(
+          and(
+            eq(bookmarks.userId, userId),
+            sql`${bookmarks.resourceId} in (${sql.join(ids.map((i) => sql`${i}`), sql`, `)})`,
+          ),
+        );
+      userBookmarks = new Set(bms.map((b) => b.resourceId));
+    }
+  }
+  return rows.map((r) => ({
+    ...r.resource,
+    subject: {
+      id: r.resource.subjectId,
+      name: r.subjectName,
+      code: r.subjectCode,
+      semester: r.semester,
+    },
+    college: {
+      id: r.resource.collegeId,
+      name: r.collegeName,
+      location: r.collegeLocation,
+    },
+    uploader: { name: r.uploaderName },
+    score: Number(r.score),
+    upvotes: Number(r.upvotes),
+    downvotes: Number(r.downvotes),
+    userVote: (userVotes.get(r.resource.id) as "upvote" | "downvote" | undefined) ?? null,
+    bookmarked: userBookmarks.has(r.resource.id),
+  }));
+}
+
 router.get(
   "/me/resources",
   asyncHandler(async (req, res) => {
     const db = await getDb();
-    const rows = await db
-      .select({
-        resource: resources,
-        subjectName: subjects.name,
-        collegeName: colleges.name,
-        downloadCount: resources.downloadCount,
-      })
+    const rows = (await db
+      .select(resourceCardSelect)
       .from(resources)
       .innerJoin(subjects, eq(resources.subjectId, subjects.id))
       .innerJoin(colleges, eq(resources.collegeId, colleges.id))
+      .innerJoin(users, eq(resources.uploadedBy, users.id))
       .where(eq(resources.uploadedBy, req.user!.id))
       .orderBy(desc(resources.createdAt))
-      .limit(100);
-    ok(res, {
-      resources: rows.map((r) => ({
-        ...r.resource,
-        subjectName: r.subjectName,
-        collegeName: r.collegeName,
-      })),
-    });
+      .limit(100)) as CardRow[];
+    ok(res, { resources: await toCardItems(rows, req.user!.id) });
   }),
 );
 
@@ -111,17 +184,16 @@ router.get(
   "/me/bookmarks",
   asyncHandler(async (req, res) => {
     const db = await getDb();
-    const rows = await db
+    const rows = (await db
       .select({
-        bookmark: bookmarks,
-        resource: resources,
-        subjectName: subjects.name,
-        collegeName: colleges.name,
+        ...resourceCardSelect,
+        bookmarkedAt: bookmarks.createdAt,
       })
       .from(bookmarks)
       .innerJoin(resources, eq(bookmarks.resourceId, resources.id))
       .innerJoin(subjects, eq(resources.subjectId, subjects.id))
       .innerJoin(colleges, eq(resources.collegeId, colleges.id))
+      .innerJoin(users, eq(resources.uploadedBy, users.id))
       .where(
         and(
           eq(bookmarks.userId, req.user!.id),
@@ -130,13 +202,16 @@ router.get(
         ),
       )
       .orderBy(desc(bookmarks.createdAt))
-      .limit(100);
+      .limit(100)) as (CardRow & { bookmarkedAt: Date })[];
+    const items = await toCardItems(
+      rows,
+      req.user!.id,
+      new Set(rows.map((r) => r.resource.id)),
+    );
     ok(res, {
-      bookmarks: rows.map((r) => ({
-        ...r.resource,
-        bookmarkedAt: r.bookmark.createdAt,
-        subjectName: r.subjectName,
-        collegeName: r.collegeName,
+      bookmarks: items.map((item, i) => ({
+        ...item,
+        bookmarkedAt: rows[i]!.bookmarkedAt,
       })),
     });
   }),

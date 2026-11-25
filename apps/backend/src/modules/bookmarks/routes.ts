@@ -1,12 +1,38 @@
 import { Router } from "express";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { getDb } from "../../db";
-import { bookmarks, colleges, resources, subjects } from "../../db/schema";
+import {
+  bookmarks,
+  colleges,
+  resources,
+  subjects,
+  users,
+} from "../../db/schema";
+import {
+  resourceDownSql,
+  resourceScoreSql,
+  resourceUpSql,
+} from "../resources/routes";
 import { requireAuth } from "../../middleware/auth";
 import { asyncHandler } from "../../middleware/common";
 import { ok } from "../../utils/http";
+import { toCardItems, type CardRow } from "../users/routes";
 
 const router = Router();
+
+const cardSelect = {
+  resource: resources,
+  subjectName: subjects.name,
+  subjectCode: subjects.code,
+  semester: subjects.semester,
+  collegeName: colleges.name,
+  collegeLocation: colleges.location,
+  uploaderName: users.name,
+  score: resourceScoreSql,
+  upvotes: resourceUpSql,
+  downvotes: resourceDownSql,
+  bookmarkedAt: bookmarks.createdAt,
+} as const;
 
 // GET /api/v1/bookmarks — the current user's bookmarked resources.
 router.get(
@@ -14,17 +40,13 @@ router.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const db = await getDb();
-    const rows = await db
-      .select({
-        bookmark: bookmarks,
-        resource: resources,
-        subjectName: subjects.name,
-        collegeName: colleges.name,
-      })
+    const rows = (await db
+      .select(cardSelect)
       .from(bookmarks)
       .innerJoin(resources, eq(bookmarks.resourceId, resources.id))
       .innerJoin(subjects, eq(resources.subjectId, subjects.id))
       .innerJoin(colleges, eq(resources.collegeId, colleges.id))
+      .innerJoin(users, eq(resources.uploadedBy, users.id))
       .where(
         and(
           eq(bookmarks.userId, req.user!.id),
@@ -33,13 +55,16 @@ router.get(
         ),
       )
       .orderBy(desc(bookmarks.createdAt))
-      .limit(100);
+      .limit(100)) as (CardRow & { bookmarkedAt: Date })[];
+    const items = await toCardItems(
+      rows,
+      req.user!.id,
+      new Set(rows.map((r) => r.resource.id)),
+    );
     ok(res, {
-      bookmarks: rows.map((r) => ({
-        ...r.resource,
-        bookmarkedAt: r.bookmark.createdAt,
-        subjectName: r.subjectName,
-        collegeName: r.collegeName,
+      bookmarks: items.map((item, i) => ({
+        ...item,
+        bookmarkedAt: rows[i]!.bookmarkedAt,
       })),
     });
   }),
