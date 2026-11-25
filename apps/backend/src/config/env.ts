@@ -17,6 +17,8 @@ const envSchema = z.object({
 
   STORAGE_PROVIDER: z.enum(["local", "r2"]).default("local"),
   AUTO_SEED: z.enum(["true", "false"]).default("false"),
+  // If set, the user with this email is promoted to admin on boot.
+  ADMIN_EMAIL: z.string().email().optional(),
   STORAGE_LOCAL_DIR: z.string().default("./uploads"),
 
   R2_ACCOUNT_ID: z.string().optional(),
