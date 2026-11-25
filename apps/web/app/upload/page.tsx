@@ -28,7 +28,7 @@ function UploadForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [resourceType, setResourceType] = useState<ResourceType>("notes");
-  const [subjectId, setSubjectId] = useState("");
+  const [subjectText, setSubjectText] = useState("");
   const [collegeId, setCollegeId] = useState("");
   const [visibility, setVisibility] = useState<"campus" | "college" | "restricted">("campus");
   const [batchYear, setBatchYear] = useState("");
@@ -55,7 +55,11 @@ function UploadForm() {
       if (file) form.append("file", file);
       form.append("title", title);
       form.append("resourceType", resourceType);
-      form.append("subjectId", subjectId);
+      const match = (subjects?.data ?? []).find(
+        (s) => s.name.toLowerCase() === subjectText.trim().toLowerCase(),
+      );
+      if (match) form.append("subjectId", match.id);
+      else form.append("subjectName", subjectText.trim());
       if (description) form.append("description", description);
       if (collegeId) form.append("collegeId", collegeId);
       if (batchYear) form.append("batchYear", batchYear);
@@ -90,7 +94,7 @@ function UploadForm() {
   const isLink = resourceType === "link";
   const valid =
     title.trim().length >= 3 &&
-    subjectId &&
+    subjectText.trim().length >= 2 &&
     (isLink ? /^https?:\/\/.+/.test(url) : !!file && file.name.toLowerCase().endsWith(".pdf"));
 
   return (
@@ -139,14 +143,23 @@ function UploadForm() {
             </div>
             <div>
               <Label htmlFor="subject">Subject</Label>
-              <Select id="subject" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
-                <option value="">Select subject…</option>
+              <Input
+                id="subject"
+                list="subject-options"
+                value={subjectText}
+                onChange={(e) => setSubjectText(e.target.value)}
+                placeholder="Type or pick a subject…"
+              />
+              <datalist id="subject-options">
                 {(subjects?.data ?? []).map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}{s.semester ? ` (Sem ${s.semester})` : ""}
+                  <option key={s.id} value={s.name}>
+                    {s.semester ? `Sem ${s.semester}` : ""}
                   </option>
                 ))}
-              </Select>
+              </datalist>
+              <p className="mt-1 text-xs text-muted">
+                Pick a suggestion or type a new subject name.
+              </p>
             </div>
           </div>
 

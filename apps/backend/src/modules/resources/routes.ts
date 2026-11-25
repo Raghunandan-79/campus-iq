@@ -243,12 +243,32 @@ router.post(
       .limit(1);
     if (!college) return next(badRequest("Unknown college"));
 
-    const [subject] = await db
-      .select({ id: subjects.id })
-      .from(subjects)
-      .where(eq(subjects.id, m.subjectId))
-      .limit(1);
-    if (!subject) return next(badRequest("Unknown subject"));
+    let subjectId: string;
+    if (m.subjectId) {
+      const [subject] = await db
+        .select({ id: subjects.id })
+        .from(subjects)
+        .where(eq(subjects.id, m.subjectId))
+        .limit(1);
+      if (!subject) return next(badRequest("Unknown subject"));
+      subjectId = subject.id;
+    } else {
+      const name = m.subjectName!.trim();
+      const [existing] = await db
+        .select({ id: subjects.id })
+        .from(subjects)
+        .where(ilike(subjects.name, name))
+        .limit(1);
+      if (existing) {
+        subjectId = existing.id;
+      } else {
+        const [created] = await db
+          .insert(subjects)
+          .values({ name, collegeId: null })
+          .returning({ id: subjects.id });
+        subjectId = created!.id;
+      }
+    }
 
     let key: string | null = null;
     const storage = getStorage();
@@ -278,7 +298,7 @@ router.post(
           title: m.title,
           description: m.description ?? null,
           resourceType: m.resourceType,
-          subjectId: m.subjectId,
+          subjectId,
           collegeId,
           uploadedBy: user.id,
           storageKey: key,

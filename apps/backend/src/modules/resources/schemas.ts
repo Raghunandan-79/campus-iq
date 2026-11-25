@@ -26,11 +26,14 @@ export const uploadMetaSchema = z.object({
   title: z.string().trim().min(3).max(300),
   description: z.string().trim().max(5000).optional().nullable(),
   resourceType: resourceTypeSchema,
-  subjectId: z.string().uuid(),
+  subjectId: z.string().uuid().optional().nullable(),
+  subjectName: z.string().trim().min(2).max(200).optional().nullable(),
   collegeId: z.string().uuid().optional().nullable(),
   visibility: z.enum(["campus", "college", "restricted"]).default("campus"),
   batchYear: z.coerce.number().int().min(2000).max(2100).optional().nullable(),
   url: z.string().trim().url().max(1000).optional().nullable(),
+}).refine((v) => v.subjectId || v.subjectName, {
+  message: "subjectId or subjectName is required",
 });
 
 export const voteSchema = z.object({
