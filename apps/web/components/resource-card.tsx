@@ -60,7 +60,7 @@ export function ResourceCard({
           <Badge tone="accent">{RESOURCE_TYPE_LABELS[resource.resourceType]}</Badge>
           <Link
             href={`/subjects/${resource.subject.id}`}
-            className="font-medium text-foreground hover:text-accent"
+            className="break-all font-medium text-foreground hover:text-accent"
           >
             {resource.subject.name}
           </Link>
@@ -74,7 +74,7 @@ export function ResourceCard({
             </>
           )}
           <span>·</span>
-          <Link href={`/colleges/${resource.college.id}`} className="hover:text-accent">
+          <Link href={`/colleges/${resource.college.id}`} className="break-all hover:text-accent">
             {resource.college.name}
           </Link>
           <span>·</span>
@@ -93,15 +93,17 @@ export function ResourceCard({
         )}
 
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex min-w-0 items-center gap-1">
             {resource.resourceType === "link" ? (
-              <Link2 className="h-3.5 w-3.5" />
+              <Link2 className="h-3.5 w-3.5 shrink-0" />
             ) : (
-              <FileText className="h-3.5 w-3.5" />
+              <FileText className="h-3.5 w-3.5 shrink-0" />
             )}
-            {resource.resourceType === "link"
-              ? "External link"
-              : `${resource.originalFilename ?? "document"}${resource.fileSize ? ` · ${formatBytes(resource.fileSize)}` : ""}`}
+            <span className="break-all">
+              {resource.resourceType === "link"
+                ? "External link"
+                : `${resource.originalFilename ?? "document"}${resource.fileSize ? ` · ${formatBytes(resource.fileSize)}` : ""}`}
+            </span>
           </span>
           <span className="inline-flex items-center gap-1">
             <Download className="h-3.5 w-3.5" />

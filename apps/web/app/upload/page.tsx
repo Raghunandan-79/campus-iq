@@ -237,7 +237,7 @@ function UploadForm() {
               className="flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-surface/50 px-4 py-8 text-center transition-colors hover:border-accent"
             >
               <UploadCloud className="h-8 w-8 text-muted" />
-              <span className="mt-2 text-sm font-medium text-foreground">
+              <span className="mt-2 max-w-full break-all text-sm font-medium text-foreground">
                 {file ? file.name : "Choose a PDF to upload"}
               </span>
               <span className="mt-1 text-xs text-muted">

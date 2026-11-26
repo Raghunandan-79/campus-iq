@@ -288,20 +288,20 @@ export default function CollegeDetailPage() {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{c.name}</h1>
-          {c.location && <p className="mt-1 text-sm text-muted">{c.location}</p>}
+          <h1 className="break-words text-2xl font-bold tracking-tight">{c.name}</h1>
+          {c.location && <p className="mt-1 break-words text-sm text-muted">{c.location}</p>}
           {c.website && (
             <a
               href={c.website}
               target="_blank"
               rel="noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-sm text-accent hover:underline"
+              className="mt-1 inline-flex max-w-full items-center gap-1 break-all text-sm text-accent hover:underline"
             >
-              <ExternalLink className="h-3.5 w-3.5" /> {c.website.replace(/^https?:\/\//, "")}
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" /> {c.website.replace(/^https?:\/\//, "")}
             </a>
           )}
           {c.description && (
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{c.description}</p>
+            <p className="mt-3 max-w-2xl break-words text-sm leading-relaxed text-muted">{c.description}</p>
           )}
         </div>
         <Card className="px-5 py-4 text-center">
@@ -330,7 +330,7 @@ export default function CollegeDetailPage() {
           })}
         </div>
         {(c.memberCount !== undefined || (c.resourceCount ?? 0) > 0) && (
-          <div className="mt-4 flex gap-6 border-t border-border pt-3 text-sm text-muted">
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 border-t border-border pt-3 text-sm text-muted">
             {c.memberCount !== undefined && <span>{c.memberCount} CampusIQ members</span>}
             {(c.resourceCount ?? 0) > 0 && <span>{c.resourceCount} resources shared</span>}
           </div>

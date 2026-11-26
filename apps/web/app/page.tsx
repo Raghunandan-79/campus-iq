@@ -107,7 +107,7 @@ export default function LandingPage() {
             students across colleges.
           </p>
           <HeroSearch />
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link href="/explore">
               <Button variant="outline" size="lg">
                 Explore resources <ArrowRight className="h-4 w-4" />

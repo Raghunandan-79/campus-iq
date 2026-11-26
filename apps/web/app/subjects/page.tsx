@@ -63,14 +63,14 @@ export default function SubjectsPage() {
             <Link key={s.id} href={`/subjects/${s.id}`}>
               <Card className="h-full p-4 transition-colors hover:border-accent">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold leading-snug">{s.name}</h3>
+                  <h3 className="min-w-0 break-words font-semibold leading-snug">{s.name}</h3>
                   {s.code && (
                     <span className="shrink-0 rounded bg-surface px-1.5 py-0.5 text-xs font-medium text-muted">
                       {s.code}
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-muted">
+                <p className="mt-1 break-words text-sm text-muted">
                   {s.semester ? `Semester ${s.semester}` : "All semesters"}
                   {s.collegeName ? ` · ${s.collegeName}` : " · Shared across colleges"}
                 </p>

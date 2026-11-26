@@ -385,7 +385,7 @@ export default function ResourceDetailPage() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
             <Badge tone="accent">{RESOURCE_TYPE_LABELS[r.resourceType]}</Badge>
-            <Link href={`/subjects/${r.subject.id}`} className="font-medium text-foreground hover:text-accent">
+            <Link href={`/subjects/${r.subject.id}`} className="break-all font-medium text-foreground hover:text-accent">
               {r.subject.name}
             </Link>
             {(r.semester ?? r.subject.semester) && (
@@ -393,9 +393,9 @@ export default function ResourceDetailPage() {
             )}
             {r.batchYear && <span>· Batch {r.batchYear}</span>}
           </div>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight">{r.title}</h1>
+          <h1 className="mt-2 break-words text-2xl font-bold tracking-tight">{r.title}</h1>
           {r.description && (
-            <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">
+            <p className="mt-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
               {r.description}
             </p>
           )}
@@ -403,18 +403,18 @@ export default function ResourceDetailPage() {
           <Card className="mt-5 divide-y divide-border text-sm">
             <div className="flex items-center justify-between px-4 py-2.5">
               <span className="text-muted">Source college</span>
-              <Link href={`/colleges/${r.college.id}`} className="inline-flex items-center gap-1 font-medium text-foreground hover:text-accent">
-                <Building2 className="h-3.5 w-3.5" /> {r.college.name}
+              <Link href={`/colleges/${r.college.id}`} className="inline-flex min-w-0 items-center gap-1 break-all text-right font-medium text-foreground hover:text-accent">
+                <Building2 className="h-3.5 w-3.5 shrink-0" /> {r.college.name}
                 {r.college.location ? ` · ${r.college.location}` : ""}
               </Link>
             </div>
             <div className="flex items-center justify-between px-4 py-2.5">
               <span className="text-muted">Uploaded by</span>
-              <span className="font-medium">{r.uploader.name}</span>
+              <span className="min-w-0 break-all text-right font-medium">{r.uploader.name}</span>
             </div>
             <div className="flex items-center justify-between px-4 py-2.5">
               <span className="text-muted">File</span>
-              <span>
+              <span className="min-w-0 break-all text-right">
                 {r.resourceType === "link" ? (
                   <a href={r.url ?? "#"} target="_blank" rel="noreferrer" className="text-accent hover:underline break-all">
                     {r.url}

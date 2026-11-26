@@ -145,7 +145,7 @@ function CollegesInner() {
         }}
         className="mb-6 flex flex-col gap-2 sm:flex-row"
       >
-        <div className="relative flex-1">
+        <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <Input value={draftQ} onChange={(e) => setDraftQ(e.target.value)} placeholder="Search colleges…" className="pl-9" />
         </div>
@@ -172,8 +172,8 @@ function CollegesInner() {
             {data.data.map((c) => (
               <Link key={c.id} href={`/colleges/${c.id}`}>
                 <Card className="flex h-full flex-col p-4 transition-colors hover:border-accent">
-                  <h3 className="font-semibold leading-snug">{c.name}</h3>
-                  {c.location && <p className="mt-0.5 text-sm text-muted">{c.location}</p>}
+                  <h3 className="break-words font-semibold leading-snug">{c.name}</h3>
+                  {c.location && <p className="mt-0.5 break-words text-sm text-muted">{c.location}</p>}
                   <div className="mt-auto pt-3">
                     <RatingSummary avg={c.avgOverall} count={c.reviewCount} />
                     {c.resourceCount !== undefined && c.resourceCount > 0 && (

@@ -84,9 +84,9 @@ function ProfileContent() {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-lg font-bold text-white">
             {(user?.name ?? "?").slice(0, 1).toUpperCase()}
           </div>
-          <div>
-            <div className="font-semibold">{user?.name}</div>
-            <div className="text-sm text-muted">{user?.email}</div>
+          <div className="min-w-0">
+            <div className="break-words font-semibold">{user?.name}</div>
+            <div className="break-all text-sm text-muted">{user?.email}</div>
             <div className="mt-0.5 text-xs text-muted capitalize">
               {user?.role} · joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : ""}
             </div>

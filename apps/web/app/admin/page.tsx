@@ -185,10 +185,10 @@ function AdminContent() {
           ) : (
             <Card className="divide-y divide-border">
               {(colleges?.data ?? []).map((c) => (
-                <div key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                  <div>
+                <div key={c.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <div className="min-w-0">
                     <span className="font-medium">{c.name}</span>
-                    <span className="ml-2 text-muted">{[c.location, c.domain].filter(Boolean).join(" · ")}</span>
+                    <span className="ml-2 break-all text-muted">{[c.location, c.domain].filter(Boolean).join(" · ")}</span>
                   </div>
                   {c.website && (
                     <a href={c.website} target="_blank" rel="noreferrer" className="text-accent hover:underline">
