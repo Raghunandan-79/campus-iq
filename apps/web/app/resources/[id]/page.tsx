@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -22,6 +22,7 @@ import {
   type ResourceReview,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/components/toast";
 import { formatBytes, timeAgo } from "@/lib/format";
 import { Badge, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,8 @@ function ReviewItem({
   depth?: number;
 }) {
   const { user } = useAuth();
+  const toast = useToast();
+  const router = useRouter();
   const qc = useQueryClient();
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -156,7 +159,8 @@ function ReviewItem({
               className="text-xs font-medium text-muted hover:text-foreground"
               onClick={() => {
                 if (!user) {
-                  window.location.href = "/auth/sign-in";
+                  toast("Please sign in or sign up first");
+                  setTimeout(() => router.push("/auth/sign-in"), 600);
                   return;
                 }
                 setReplyOpen((v) => !v);
@@ -318,6 +322,16 @@ export default function ResourceDetailPage() {
   const id = params.id;
   const { user, isAuthenticated } = useAuth();
   const qc = useQueryClient();
+  const toast = useToast();
+  const router = useRouter();
+
+  const requireAuth = (e?: { preventDefault: () => void }) => {
+    if (isAuthenticated) return true;
+    e?.preventDefault();
+    toast("Please sign in or sign up first");
+    setTimeout(() => router.push("/auth/sign-in"), 600);
+    return false;
+  };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["resource", id],
@@ -425,13 +439,19 @@ export default function ResourceDetailPage() {
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {r.resourceType === "link" && r.url ? (
-              <a href={`/api/v1/resources/${r.id}/download`}>
+              <a
+                href={`/api/v1/resources/${r.id}/download`}
+                onClick={(e) => requireAuth(e)}
+              >
                 <Button>
                   <Download className="h-4 w-4" /> Open link
                 </Button>
               </a>
             ) : (
-              <a href={`/api/v1/resources/${r.id}/download`}>
+              <a
+                href={`/api/v1/resources/${r.id}/download`}
+                onClick={(e) => requireAuth(e)}
+              >
                 <Button>
                   <Download className="h-4 w-4" /> Download PDF
                 </Button>
@@ -440,10 +460,7 @@ export default function ResourceDetailPage() {
             <Button
               variant="outline"
               onClick={() => {
-                if (!isAuthenticated) {
-                  window.location.href = "/auth/sign-in";
-                  return;
-                }
+                if (!requireAuth()) return;
                 bookmarkMutation.mutate(r);
               }}
             >

@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "@/components/providers";
 import { AuthProvider } from "@/lib/auth";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
+import { ToastProvider } from "@/components/toast";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,11 +32,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <QueryProvider>
           <AuthProvider>
+            <ToastProvider>
             <div className="flex min-h-screen flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>
               <SiteFooter />
             </div>
+            </ToastProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import { clsx } from "clsx";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "./toast";
 
 interface VoteTarget {
   id: string;
@@ -32,6 +34,8 @@ export function VoteButtons({
   orientation?: "vertical" | "horizontal";
 }) {
   const { isAuthenticated } = useAuth();
+  const toast = useToast();
+  const router = useRouter();
   const qc = useQueryClient();
   const [localVote, setLocalVote] = useState(target.userVote ?? null);
   const [localScore, setLocalScore] = useState(target.score);
@@ -92,7 +96,8 @@ export function VoteButtons({
 
   const handle = (vote: "upvote" | "downvote") => {
     if (!isAuthenticated) {
-      window.location.href = "/auth/sign-in";
+      toast("Please sign in or sign up first");
+      setTimeout(() => router.push("/auth/sign-in"), 600);
       return;
     }
     if (mutation.isPending) return;

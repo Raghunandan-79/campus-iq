@@ -5,7 +5,9 @@ import { Bookmark, Download, FileText, Link2, MessageSquare, Trash2 } from "luci
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import { api, RESOURCE_TYPE_LABELS, type ResourceListItem } from "@/lib/api";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "./toast";
 import { formatBytes, timeAgo } from "@/lib/format";
 import { Badge } from "./ui/card";
 import { VoteButtons } from "./vote-buttons";
@@ -18,6 +20,8 @@ export function ResourceCard({
   showVote?: boolean;
 }) {
   const { isAuthenticated, user } = useAuth();
+  const toast = useToast();
+  const router = useRouter();
   const qc = useQueryClient();
 
   const canDelete =
@@ -114,7 +118,8 @@ export function ResourceCard({
             type="button"
             onClick={() => {
               if (!isAuthenticated) {
-                window.location.href = "/auth/sign-in";
+                toast("Please sign in or sign up first");
+                setTimeout(() => router.push("/auth/sign-in"), 600);
                 return;
               }
               bookmarkMutation.mutate();
